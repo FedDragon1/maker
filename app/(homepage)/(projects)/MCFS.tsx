@@ -11,7 +11,7 @@ import { addComplex, analyzeCurve, expComplex, fourierCoefficients, multiplyComp
 import { ModelLoader } from "@/utils/three/modelLoader";
 import { McfsMaterial } from "@/app/(mcfs)/(material)/mcfsMaterial";
 import { PointRegistry } from "@/app/(mcfs)/fourierViewer";
-import LazyThreeCanvas from "@/app/LazyThreeCanvas";
+import LazyThreeCanvas from "@/app/(components)/LazyThreeCanvas";
 
 interface Props {
 }

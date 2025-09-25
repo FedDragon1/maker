@@ -171,7 +171,7 @@ export class MGAnimation {
         // update active children
         const newActiveChildren: number[] = []
         for (let i = 0; i < this.children.length; i++) {
-            const [start, end, child] = this.children[i]
+            const [start, end, _] = this.children[i]
             if (start <= alpha && alpha <= end) {
                 newActiveChildren.push(i)
             }

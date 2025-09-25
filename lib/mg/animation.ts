@@ -69,17 +69,31 @@ export class AnimationScheduler {
     }
 
     set newAlpha(newAlpha: number) {
-        if (newAlpha < 0 || newAlpha >= 1) {
+        if ((newAlpha < 0 || newAlpha >= 1)) {
             // assume scrolling out of bounds
-            setTimeout(() => {
-                this.stopAnimations()
-            })
-            newAlpha = Math.min(Math.max(newAlpha, 0), 1)
+            this.alpha = Math.min(Math.max(newAlpha, 0), 1)
+            if (this.running) {
+                this.step()
+            }
+            this.stopAnimations()
+            return
         }
 
         this.alpha = newAlpha
         if (!this.running) {
             this.startAnimations()
+        }
+    }
+
+    step() {
+        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
+        const dt = this.timeTracker.getDelta()
+        const [u, v] = this.mouseTracker.getPosition()
+        for (const animation of this.animations) {
+            animation.update(this.alpha, dt, u, v)
+        }
+        for (const object of this.objects) {
+            object.renderAllTo(this.ctx)
         }
     }
 
@@ -90,21 +104,13 @@ export class AnimationScheduler {
         this.running = true
         this.timeTracker.reset()
 
-        const step = () => {
-            this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
-            const dt = this.timeTracker.getDelta()
-            const [u, v] = this.mouseTracker.getPosition()
-            for (const animation of this.animations) {
-                animation.update(this.alpha, dt, u, v)
+        const loop = () => {
+            this.step()
+            if (this.running) {
+                this.handler = requestAnimationFrame(loop)
             }
-            for (const object of this.objects) {
-                object.renderAllTo(this.ctx)
-            }
-
-            this.handler = requestAnimationFrame(step)
         }
-
-        this.handler = requestAnimationFrame(step)
+        requestAnimationFrame(loop)
     }
 }
 

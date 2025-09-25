@@ -3,6 +3,7 @@
 import { FC, useEffect, useRef } from "react";
 import { Square, Shape, Triangle, Circle } from "@/lib/mg/primitives";
 import { AnimationScheduler, MGAnimation } from "@/lib/mg/animation";
+import Transition1 from "@/app/(composed)/(2_transition1)/Transition1";
 
 
 function initializeCanvas(canvas: HTMLCanvasElement) {
@@ -12,12 +13,13 @@ function initializeCanvas(canvas: HTMLCanvasElement) {
         return
     }
 
-    let blur = 10
+    let red = 0
+    let green = 0
 
     const square: Shape = new Square(100, {
         position: [250, 200],
         style: (ctx) => {
-            ctx.fillStyle = "rgba(0, 0, 255, 0.5)"
+            ctx.fillStyle = `rgba(${red}, ${green}, 0, 0.5)`
             ctx.strokeStyle = "blue"
             ctx.lineWidth = 3
             ctx.shadowColor = "rgba(0, 0, 0, 0.3)"
@@ -45,39 +47,26 @@ function initializeCanvas(canvas: HTMLCanvasElement) {
     });
     triangle.addChildren(circle)
 
-    const scheduler = new AnimationScheduler(ctx, [square])
-    scheduler.addAnimations(new MGAnimation([], [
-        (dt) => {
-            square.rotateBy(dt)
-            triangle.rotateBy(-2 * dt)
-        }
-    ], [
-        (u, v) => {
-            square.setScale(u * 100 + 100)
-            square.setPosition([u * 100 + 500, v * 100 + 500])
-
-        }
-    ]))
-    scheduler.startAnimations()
 
     console.log("Canvas initialized")
 }
 
 
 const TestPage: FC = () => {
-    const canvas = useRef(null);
-
-    useEffect(() => {
-        if (!canvas.current) {
-            return
-        }
-        initializeCanvas(canvas.current)
-    }, [canvas]);
+    // const canvas = useRef(null);
+    //
+    // useEffect(() => {
+    //     if (!canvas.current) {
+    //         return
+    //     }
+    //     initializeCanvas(canvas.current)
+    // }, [canvas]);
 
     return (
-        <div>
-            <canvas ref={canvas} width={1000} height={1000} className={"border-zinc-700 border m-5"} />
-        </div>
+        // <div>
+        //     <canvas ref={canvas} width={1000} height={1000} className={"border-zinc-700 border m-5"} />
+        // </div>
+        <Transition1/>
     )
 }
 

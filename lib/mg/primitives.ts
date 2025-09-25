@@ -15,7 +15,7 @@ const defaultStyle = (ctx: CanvasRenderingContext2D) => {
     ctx.globalCompositeOperation = 'source-over';
 
     // styles
-    ctx.fillStyle = '#00000000';
+    ctx.fillStyle = 'transparent';
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 1;
     ctx.lineCap = 'butt';
@@ -65,7 +65,7 @@ export class Shape {
     scale: number
     rotation: number
     hidden: boolean = false
-    style: (ctx: CanvasRenderingContext2D) => void
+    styleFn: (ctx: CanvasRenderingContext2D) => void
 
     constructor(points: Point[],
                 closed: boolean = false,
@@ -80,7 +80,56 @@ export class Shape {
         this.children = children;
         this.scale = scale;
         this.rotation = rotation
-        this.style = style
+        this.styleFn = style
+    }
+
+    interpolatePoint(t: number) {
+        if (t <= 0 || (t >= 1 && this.closed)) {
+            return this.points[0]
+        }
+        if (t >=1) {
+            return this.points[this.points.length - 1]
+        }
+
+        const lengths = []
+        for (let i = 0; i < this.points.length - 1; i++) {
+            const [x1, y1] = this.points[i]
+            const [x2, y2] = this.points[i + 1]
+            lengths.push(Math.hypot(x2 - x1, y2 - y1))
+        }
+        if (this.closed) {
+            const [x1, y1] = this.points[this.points.length - 1]
+            const [x2, y2] = this.points[0]
+            lengths.push(Math.hypot(x2 - x1, y2 - y1))
+        }
+        const totalLength = lengths.reduce((a, b) => a + b, 0)
+        const targetLength = t * totalLength
+
+        let cumLength = 0
+        for (let i = 0; i < lengths.length; i++) {
+            if (cumLength + lengths[i] >= targetLength) {
+                const [x1, y1] = this.points[i]
+                const [x2, y2] = this.points[(i + 1) % this.points.length]
+                const segmentLength = lengths[i]
+                const segmentT = (targetLength - cumLength) / segmentLength
+                return [
+                    x1 + (x2 - x1) * segmentT,
+                    y1 + (y2 - y1) * segmentT
+                ] as Point
+            }
+            cumLength += lengths[i]
+        }
+
+        return this.points[this.points.length - 1]
+    }
+
+    resamplePoints(numPoints: number) {
+        const newPoints: Point[] = []
+        for (let i = 0; i < numPoints; i++) {
+            const t = i / (numPoints - 1)
+            newPoints.push(this.interpolatePoint(t))
+        }
+        return newPoints
     }
 
     renderTo(ctx: CanvasRenderingContext2D) {
@@ -100,7 +149,7 @@ export class Shape {
             (x * Math.sin(this.rotation) + y * Math.cos(this.rotation)) * this.scale + this.position[1]
         ] as const)
 
-        this.style(ctx)
+        this.styleFn(ctx)
         ctx.beginPath();
         ctx.moveTo(...canvasSpacePoints[0]);
         for (let i = 1; i < this.points.length; i++) {
@@ -207,6 +256,11 @@ export class Shape {
         this.position = position
         return this
     }
+
+    style(styleFn: (ctx: CanvasRenderingContext2D) => void) {
+        this.styleFn = styleFn
+        return this
+    }
 }
 
 
@@ -246,8 +300,8 @@ export class Triangle extends Shape {
                 }) {
         super(
             [
-                [-0.5, 0.5 / Math.sqrt(3)],
                 [0.5, 0.5 / Math.sqrt(3)],
+                [-0.5, 0.5 / Math.sqrt(3)],
                 [0, -1 / Math.sqrt(3)]
             ],
             true,
@@ -262,7 +316,7 @@ export class Triangle extends Shape {
 
 
 export class Circle extends Shape {
-    constructor(radius: number,
+    constructor(public diameter: number,
                 params?: {
                     position?: Point,
                     numSegments?: number,
@@ -271,17 +325,25 @@ export class Circle extends Shape {
                     style?: (ctx: CanvasRenderingContext2D) => void
                 }) {
         const points: Point[] = [];
-        const numSegments = params?.numSegments ?? 32
+        const numSegments = params?.numSegments ?? 64
         for (let i = 0; i < numSegments; i++) {
             const angle = (i / numSegments) * 2 * Math.PI;
-            points.push([Math.cos(angle) * radius, Math.sin(angle) * radius]);
+            points.push([Math.cos(angle), Math.sin(angle)]);
         }
-        super(points, true, params?.position, params?.children, radius, params?.rotation, params?.style);
+        super(points, true, params?.position, params?.children, diameter, params?.rotation, params?.style);
+    }
+
+    interpolatePoint(t: number): [number, number] {
+        const angle = t * 2 * Math.PI;
+        return [
+            Math.cos(angle) / 2,
+            Math.sin(angle) / 2
+        ];
     }
 
     renderImpl(ctx: CanvasRenderingContext2D) {
-        this.style(ctx)
+        this.styleFn(ctx)
         ctx.beginPath();
-        ctx.arc(this.position[0], this.position[1], this.scale, 0, 2 * Math.PI);
+        ctx.arc(this.position[0], this.position[1], this.scale / 2, 0, 2 * Math.PI);
     }
 }

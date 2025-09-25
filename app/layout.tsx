@@ -41,8 +41,8 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-        <body>
-        <main className="bg-red-50 overflow-x-hidden">
+        <body className={"overflow-x-hidden"}>
+        <main className="bg-red-50">
             {children}
         </main>
         </body>

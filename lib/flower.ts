@@ -139,7 +139,7 @@ class Petal extends THREE.Object3D {
     }
 }
 
-class Flower extends THREE.Object3D {
+export class Flower extends THREE.Object3D {
     petals: Petal[]
 
     constructor(petals: Petal[]) {

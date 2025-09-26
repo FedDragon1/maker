@@ -4,8 +4,10 @@ import { AnimationScheduler, MGAnimation, MGTransition } from "@/lib/mg/animatio
 
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { registerCanvasResizeListener2d } from "@/lib/threeHelper";
 
 gsap.registerPlugin(ScrollTrigger)
+
 
 const initializeCanvas = (ctx: CanvasRenderingContext2D) => {
     let shadowOffsetX = 0,
@@ -117,13 +119,16 @@ const Transition1: FC = () => {
         canvas.current.width = canvas.current.clientWidth
         canvas.current.height = canvas.current.clientHeight
 
+        const resizeCleanUp = registerCanvasResizeListener2d(canvas.current)
         initializeCanvas(ctx)
+
+        return resizeCleanUp
     }, [canvas]);
 
     return (
         <>
             <div className={"w-screen h-[200vh] relative"} id={"transition-1"}>
-                <canvas className={"w-screen h-screen sticky top-0"} ref={canvas}/>
+                <canvas className={"w-screen h-screen aspect-square sticky top-0"} ref={canvas}/>
             </div>
             <div className={"h-screen"} ></div>
         </>

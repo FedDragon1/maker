@@ -73,7 +73,7 @@ export class Shape {
                 children: Shape[] = [],
                 scale: number = 1,
                 rotation: number = 0,
-                style: (ctx: CanvasRenderingContext2D) => void = defaultStyle) {
+                style: (ctx: CanvasRenderingContext2D) => void = () => {}) {
         this.points = points;
         this.closed = closed;
         this.position = position;
@@ -136,6 +136,7 @@ export class Shape {
         if (this.hidden) {
             return
         }
+        defaultStyle(ctx)
 
         this.renderImpl(ctx)
 

@@ -3,7 +3,7 @@ import { EffectComposer } from "postprocessing";
 import { FC, ReactNode, useCallback, useEffect, useState } from "react";
 import { onCanvasLoad } from "@/lib/flower";
 
-function registerCanvasResizeListenerImpl(canvasResizeListener: () => void) {
+export function registerCanvasResizeListenerImpl(canvasResizeListener: () => void) {
     canvasResizeListener()
 
     window.addEventListener("resize", canvasResizeListener)

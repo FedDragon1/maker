@@ -20,7 +20,7 @@ const TestPage: FC = () => {
         //     <canvas ref={canvas} width={1000} height={1000} className={"border-zinc-700 border m-5"} />
         // </div>
         // <Transition1/>
-        <Transition3 />
+        <Transition3 gridSize={[7, 12]} />
     )
 }
 

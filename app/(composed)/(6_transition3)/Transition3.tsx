@@ -1,19 +1,14 @@
-import { FC, useCallback, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useRef } from "react";
 import * as THREE from "three";
 // @ts-ignore
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import {
-    registerCanvasResizeListener,
     registerCanvasResizeListenerImpl,
     registerMouseMoveListener
 } from "@/lib/threeHelper";
 import { EffectComposer, RenderPass } from "postprocessing";
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { Flower } from "@/lib/flower";
-import { AxesHelper } from "three";
-import Transition1 from "@/app/(composed)/(2_transition1)/Transition1";
-import { mulberry32 } from "@/lib/nodes/utils";
 
 async function loadModel(): Promise<THREE.Mesh> {
     const loader = new GLTFLoader()
